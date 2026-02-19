@@ -16,7 +16,7 @@ import AboutContact from './components/AboutContact';
 import Footer from './components/Footer';
 import WhatsAppButton from './components/WhatsAppButton';
 import { useSEO } from './hooks/useSEO';
-import { supabase } from './lib/supabase';
+import { siteSettings } from './lib/api';
 
 const ShopPage = lazy(() => import('./components/shop/ShopPage'));
 const ProductDetail = lazy(() => import('./components/shop/ProductDetail'));
@@ -67,12 +67,7 @@ function App() {
   useEffect(() => {
     const updateFavicon = async () => {
       try {
-        const { data } = await supabase
-          .from('site_settings')
-          .select('setting_value')
-          .eq('setting_key', 'logo_url')
-          .maybeSingle();
-
+        const data: any = await siteSettings.get('general', 'logo_url');
         if (data?.setting_value) {
           let link = document.querySelector("link[rel~='icon']") as HTMLLinkElement;
           if (!link) {

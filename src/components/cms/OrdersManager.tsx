@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ShoppingCart, Eye, Check, X, Clock, Package } from 'lucide-react';
-import { supabase, Order, Product } from '../../lib/supabase';
+import { orders as ordersApi, siteSettings } from '../../lib/api';
+import type { Order, Product } from '../../lib/supabase';
 import toast from 'react-hot-toast';
 import Pagination from './shared/Pagination';
 
@@ -19,28 +20,20 @@ const OrdersManager: React.FC = () => {
   useEffect(() => {
     fetchOrders();
     const fetchWhatsapp = async () => {
-      const { data } = await supabase
-        .from('site_settings')
-        .select('setting_value')
-        .eq('setting_key', 'whatsapp_number')
-        .maybeSingle();
-      if (data?.setting_value) setWhatsappNumber(data.setting_value);
+      try {
+        const data = await siteSettings.get('company', 'whatsapp_number');
+        if (data?.setting_value) setWhatsappNumber(data.setting_value);
+      } catch (error) {
+        console.error('Error fetching whatsapp number:', error);
+      }
     };
     fetchWhatsapp();
   }, []);
 
   const fetchOrders = async () => {
     try {
-      const { data, error } = await supabase
-        .from('orders')
-        .select(`
-          *,
-          products (*)
-        `)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      setOrders(data || []);
+      const data = await ordersApi.list();
+      setOrders((data as any)?.data || data || []);
     } catch (error) {
       console.error('Error fetching orders:', error);
       toast.error(isRTL ? 'فشل تحميل الطلبات' : 'Failed to load orders');
@@ -51,12 +44,7 @@ const OrdersManager: React.FC = () => {
 
   const updateOrderStatus = async (orderId: string, status: string) => {
     try {
-      const { error } = await supabase
-        .from('orders')
-        .update({ status, updated_at: new Date().toISOString() })
-        .eq('id', orderId);
-
-      if (error) throw error;
+      await ordersApi.update(orderId, { status });
 
       toast.success(isRTL ? 'تم تحديث حالة الطلب' : 'Order status updated');
       fetchOrders();

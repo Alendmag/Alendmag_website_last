@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Calendar, User, ArrowRight, BookOpen } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { supabase } from '../lib/supabase';
+import { blogPosts as blogPostsApi } from '../lib/api';
 
 interface BlogPost {
   id: string;
@@ -44,15 +44,9 @@ const Blog: React.FC = () => {
 
   const fetchPosts = async () => {
     try {
-      const { data, error } = await supabase
-        .from('blog_posts')
-        .select('id, title_ar, title_en, excerpt_ar, excerpt_en, image_url, category, published_at, tags')
-        .eq('is_published', true)
-        .order('published_at', { ascending: false })
-        .limit(3);
-
-      if (error) throw error;
-      setPosts(data || []);
+      const result = await blogPostsApi.list({ is_published: true });
+      const data = (result as any)?.data || result;
+      setPosts((data || []).slice(0, 3));
     } catch (error) {
       console.error('Error fetching blog posts:', error);
     } finally {

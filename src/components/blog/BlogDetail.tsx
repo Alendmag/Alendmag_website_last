@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Calendar, User, ArrowRight, Tag, BookOpen, ArrowLeft, Eye, Share2, Twitter, Facebook, Link2, Check } from 'lucide-react';
-import { supabase } from '../../lib/supabase';
+import { blogPosts as blogPostsApi } from '../../lib/api';
 import type { BlogPost } from '../../lib/supabase';
 
 const categoryColors: { [key: string]: string } = {
@@ -35,14 +35,8 @@ const BlogDetail: React.FC = () => {
     const fetchPost = async () => {
       if (!slug) return;
       try {
-        const { data, error } = await supabase
-          .from('blog_posts')
-          .select('*')
-          .eq('is_published', true)
-          .or(`id.eq.${slug},title_en.ilike.%${slug.replace(/-/g, '%')}%`)
-          .maybeSingle();
+        const data = await blogPostsApi.get(slug);
 
-        if (error) throw error;
         if (data) {
           setPost(data);
           fetchRelated(data.category, data.id);
@@ -58,19 +52,18 @@ const BlogDetail: React.FC = () => {
   }, [slug]);
 
   const incrementViewCount = async (postId: string) => {
-    await supabase.rpc('increment_blog_views', { post_id: postId }).maybeSingle();
+    try {
+      await blogPostsApi.update(postId, { increment_views: true });
+    } catch {
+      // silently ignore view count errors
+    }
   };
 
   const fetchRelated = async (category: string, excludeId: string) => {
     try {
-      const { data } = await supabase
-        .from('blog_posts')
-        .select('id, title_ar, title_en, excerpt_ar, excerpt_en, image_url, category, published_at, view_count')
-        .eq('is_published', true)
-        .eq('category', category)
-        .neq('id', excludeId)
-        .limit(3);
-      setRelatedPosts(data || []);
+      const result = await blogPostsApi.list({ category, exclude_id: excludeId, limit: 3 });
+      const data = (result as any)?.data || result;
+      setRelatedPosts((data || []).filter((p: any) => p.id !== excludeId).slice(0, 3));
     } catch {
       setRelatedPosts([]);
     }

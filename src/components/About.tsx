@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Target, Eye, Heart, Award, Users, TrendingUp, User } from 'lucide-react';
-import { supabase } from '../lib/supabase';
+import { teamMembers as teamMembersApi } from '../lib/api';
 
 interface TeamMember {
   id: string;
@@ -24,17 +24,9 @@ const About: React.FC = () => {
 
   const fetchTeam = async () => {
     try {
-      const { data } = await supabase
-        .from('team_members')
-        .select('id, name_ar, name_en, position_ar, position_en, photo_url, image_url')
-        .eq('is_active', true)
-        .eq('is_admin', false)
-        .order('order_index')
-        .limit(6);
-      setTeamMembers(data || []);
-    } catch {
-      // silently fail
-    }
+      const data = await teamMembersApi.list() as any[];
+      setTeamMembers((data || []).filter((m: any) => m.is_active && !m.is_admin).slice(0, 6));
+    } catch {}
   };
 
   const values = [

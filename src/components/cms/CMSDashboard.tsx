@@ -17,7 +17,7 @@ import {
   CheckCircle2,
   Clock
 } from 'lucide-react';
-import { supabase } from '../../lib/supabase';
+import { products as productsApi, orders as ordersApi, clients as clientsApi, projects as projectsApi, teamMembers as teamMembersApi, testimonials as testimonialsApi, faq as faqApi, supportTickets as supportTicketsApi, projectTasks as projectTasksApi, contactMessages as contactMessagesApi, blogPosts as blogPostsApi } from '../../lib/api';
 
 interface CMSDashboardProps {
   onTabChange?: (tab: string, openForm?: boolean) => void;
@@ -57,66 +57,66 @@ const CMSDashboard: React.FC<CMSDashboardProps> = ({ onTabChange }) => {
   const fetchStats = async () => {
     try {
       const [
-        products,
-        orders,
-        clients,
-        projects,
-        teamMembers,
-        testimonials,
-        faq,
-        supportTickets,
-        projectTasks,
-        messages,
-        blogPosts
+        productsData,
+        ordersResult,
+        clientsData,
+        projectsData,
+        teamMembersData,
+        testimonialsData,
+        faqData,
+        supportTicketsResult,
+        projectTasksData,
+        messagesResult,
+        blogPostsResult
       ] = await Promise.all([
-        supabase.from('products').select('*', { count: 'exact', head: true }),
-        supabase.from('orders').select('*', { count: 'exact', head: true }),
-        supabase.from('clients').select('*', { count: 'exact', head: true }),
-        supabase.from('projects').select('*', { count: 'exact', head: true }),
-        supabase.from('team_members').select('*', { count: 'exact', head: true }),
-        supabase.from('testimonials').select('*', { count: 'exact', head: true }),
-        supabase.from('faq').select('*', { count: 'exact', head: true }),
-        supabase.from('support_tickets').select('*', { count: 'exact', head: true }),
-        supabase.from('project_tasks').select('*', { count: 'exact', head: true }),
-        supabase.from('contact_messages').select('*', { count: 'exact', head: true }),
-        supabase.from('blog_posts').select('*', { count: 'exact', head: true })
+        productsApi.list(),
+        ordersApi.list(),
+        clientsApi.list(),
+        projectsApi.list(),
+        teamMembersApi.list(),
+        testimonialsApi.list(),
+        faqApi.list(),
+        supportTicketsApi.list(),
+        projectTasksApi.list(),
+        contactMessagesApi.list(),
+        blogPostsApi.list()
       ]);
 
-      const [pendingOrders, activeProjects, completedProjects, openTickets, unreadMessages, publishedPosts] = await Promise.all([
-        supabase.from('orders').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
-        supabase.from('projects').select('*', { count: 'exact', head: true }).eq('status', 'in-progress'),
-        supabase.from('projects').select('*', { count: 'exact', head: true }).eq('status', 'completed'),
-        supabase.from('support_tickets').select('*', { count: 'exact', head: true }).eq('status', 'open'),
-        supabase.from('contact_messages').select('*', { count: 'exact', head: true }).eq('is_read', false),
-        supabase.from('blog_posts').select('*', { count: 'exact', head: true }).eq('is_published', true)
-      ]);
+      const ordersData: any[] = (ordersResult as any)?.data || ordersResult || [];
+      const supportTicketsData: any[] = (supportTicketsResult as any)?.data || supportTicketsResult || [];
+      const messagesData: any[] = (messagesResult as any)?.data || messagesResult || [];
+      const blogPostsData: any[] = (blogPostsResult as any)?.data || blogPostsResult || [];
 
-      const { data: ordersData } = await supabase
-        .from('orders')
-        .select('total_amount')
-        .eq('status', 'completed');
+      const pendingOrdersCount = ordersData.filter((o: any) => o.status === 'pending').length;
+      const activeProjectsCount = (projectsData as any[]).filter((p: any) => p.status === 'in-progress').length;
+      const completedProjectsCount = (projectsData as any[]).filter((p: any) => p.status === 'completed').length;
+      const openTicketsCount = supportTicketsData.filter((t: any) => t.status === 'open').length;
+      const unreadMessagesCount = messagesData.filter((m: any) => !m.is_read).length;
+      const publishedPostsCount = blogPostsData.filter((p: any) => p.is_published).length;
 
-      const revenue = ordersData?.reduce((sum, order) => sum + (order.total_amount || 0), 0) || 0;
+      const revenue = ordersData
+        .filter((o: any) => o.status === 'completed')
+        .reduce((sum: number, order: any) => sum + (order.total_amount || 0), 0);
 
       setStats({
-        products: products.count || 0,
-        orders: orders.count || 0,
-        clients: clients.count || 0,
-        projects: projects.count || 0,
-        teamMembers: teamMembers.count || 0,
-        pendingOrders: pendingOrders.count || 0,
-        activeProjects: activeProjects.count || 0,
-        testimonials: testimonials.count || 0,
-        faq: faq.count || 0,
-        supportTickets: supportTickets.count || 0,
-        openTickets: openTickets.count || 0,
-        projectTasks: projectTasks.count || 0,
-        completedProjects: completedProjects.count || 0,
+        products: (productsData as any[]).length,
+        orders: ordersData.length,
+        clients: (clientsData as any[]).length,
+        projects: (projectsData as any[]).length,
+        teamMembers: (teamMembersData as any[]).length,
+        pendingOrders: pendingOrdersCount,
+        activeProjects: activeProjectsCount,
+        testimonials: (testimonialsData as any[]).length,
+        faq: (faqData as any[]).length,
+        supportTickets: supportTicketsData.length,
+        openTickets: openTicketsCount,
+        projectTasks: (projectTasksData as any[]).length,
+        completedProjects: completedProjectsCount,
         revenue,
-        messages: messages.count || 0,
-        unreadMessages: unreadMessages.count || 0,
-        blogPosts: blogPosts.count || 0,
-        publishedPosts: publishedPosts.count || 0
+        messages: messagesData.length,
+        unreadMessages: unreadMessagesCount,
+        blogPosts: blogPostsData.length,
+        publishedPosts: publishedPostsCount
       });
     } catch (error) {
       console.error('Error fetching stats:', error);

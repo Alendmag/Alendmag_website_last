@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Calendar, User, ArrowRight, BookOpen, Search, Tag } from 'lucide-react';
-import { supabase } from '../../lib/supabase';
+import { blogPosts as blogPostsApi } from '../../lib/api';
 import type { BlogPost } from '../../lib/supabase';
 
 const categoryColors: { [key: string]: string } = {
@@ -32,12 +32,8 @@ const BlogPage: React.FC = () => {
   useEffect(() => {
     const fetchPosts = async () => {
       try {
-        const { data, error } = await supabase
-          .from('blog_posts')
-          .select('*')
-          .eq('is_published', true)
-          .order('published_at', { ascending: false });
-        if (error) throw error;
+        const result = await blogPostsApi.list({ is_published: true });
+        const data = (result as any)?.data || result;
         setPosts(data || []);
       } catch {
         setPosts([]);

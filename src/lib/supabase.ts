@@ -1,15 +1,36 @@
-import { createClient } from '@supabase/supabase-js';
+export * from './api';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+export const supabase = {
+  from: (_table: string) => ({
+    select: (..._args: any[]) => ({
+      eq: (..._a: any[]) => ({
+        maybeSingle: async () => ({ data: null, error: null }),
+        order: (..._b: any[]) => ({ limit: async () => ({ data: [], error: null }) }),
+        neq: (..._b: any[]) => ({ limit: async () => ({ data: [], error: null }) }),
+      }),
+      order: (..._b: any[]) => ({
+        limit: async () => ({ data: [], error: null }),
+        ascending: (..._c: any[]) => ({ limit: async () => ({ data: [], error: null }) }),
+      }),
+      limit: async () => ({ data: [], error: null }),
+    }),
+    insert: (_data: any) => Promise.resolve({ data: null, error: null }),
+    update: (_data: any) => ({ eq: () => Promise.resolve({ data: null, error: null }) }),
+    delete: () => ({ eq: () => Promise.resolve({ data: null, error: null }) }),
+    upsert: (_data: any) => Promise.resolve({ data: null, error: null }),
+  }),
+  rpc: (_fn: string, _args?: any) => ({
+    maybeSingle: async () => ({ data: null, error: null }),
+  }),
+  storage: {
+    from: (_bucket: string) => ({
+      upload: async () => ({ data: null, error: new Error('Use PHP API') }),
+      remove: async () => ({ data: null, error: null }),
+      getPublicUrl: (_path: string) => ({ data: { publicUrl: '' } }),
+    }),
+  },
+};
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Missing Supabase environment variables');
-}
-
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
-
-// Types
 export interface Product {
   id: string;
   name_ar: string;
@@ -83,14 +104,6 @@ export interface TeamMember {
   created_at: string;
 }
 
-export interface SiteContent {
-  id: string;
-  section: string;
-  content_ar: Record<string, any>;
-  content_en: Record<string, any>;
-  updated_at: string;
-}
-
 export interface Testimonial {
   id: string;
   client_name: string;
@@ -146,6 +159,7 @@ export interface BlogPost {
   tags?: string[];
   is_published: boolean;
   published_at?: string;
+  view_count?: number;
   created_at: string;
   updated_at: string;
 }

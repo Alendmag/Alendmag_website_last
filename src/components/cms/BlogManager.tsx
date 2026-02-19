@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Plus, Edit, Trash2, Save, X, BookOpen, Eye, EyeOff, Calendar } from 'lucide-react';
-import { supabase } from '../../lib/supabase';
+import { blogPosts as blogPostsApi } from '../../lib/api';
 import toast from 'react-hot-toast';
 
 interface BlogPost {
@@ -60,13 +60,8 @@ const BlogManager: React.FC = () => {
 
   const fetchPosts = async () => {
     try {
-      const { data, error } = await supabase
-        .from('blog_posts')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      setPosts(data || []);
+      const data = await blogPostsApi.list();
+      setPosts((data as any)?.data || data || []);
     } catch {
       toast.error(isRTL ? 'فشل تحميل المقالات' : 'Failed to load posts');
     } finally {
@@ -95,17 +90,10 @@ const BlogManager: React.FC = () => {
       };
 
       if (editingPost) {
-        const { error } = await supabase
-          .from('blog_posts')
-          .update(dataToSave)
-          .eq('id', editingPost.id);
-        if (error) throw error;
+        await blogPostsApi.update(editingPost.id, dataToSave);
         toast.success(isRTL ? 'تم تحديث المقال بنجاح' : 'Post updated successfully');
       } else {
-        const { error } = await supabase
-          .from('blog_posts')
-          .insert([dataToSave]);
-        if (error) throw error;
+        await blogPostsApi.create(dataToSave);
         toast.success(isRTL ? 'تم إضافة المقال بنجاح' : 'Post added successfully');
       }
 
@@ -125,15 +113,10 @@ const BlogManager: React.FC = () => {
 
   const handleTogglePublish = async (post: BlogPost) => {
     try {
-      const { error } = await supabase
-        .from('blog_posts')
-        .update({
-          is_published: !post.is_published,
-          published_at: !post.is_published ? new Date().toISOString() : null
-        })
-        .eq('id', post.id);
-
-      if (error) throw error;
+      await blogPostsApi.update(post.id, {
+        is_published: !post.is_published,
+        published_at: !post.is_published ? new Date().toISOString() : null
+      });
       toast.success(isRTL
         ? (!post.is_published ? 'تم نشر المقال' : 'تم إلغاء نشر المقال')
         : (!post.is_published ? 'Post published' : 'Post unpublished')
@@ -148,8 +131,7 @@ const BlogManager: React.FC = () => {
     if (!confirm(isRTL ? 'هل أنت متأكد من حذف هذا المقال؟' : 'Are you sure you want to delete this post?')) return;
 
     try {
-      const { error } = await supabase.from('blog_posts').delete().eq('id', id);
-      if (error) throw error;
+      await blogPostsApi.remove(id);
       toast.success(isRTL ? 'تم حذف المقال' : 'Post deleted');
       fetchPosts();
     } catch {

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ExternalLink, FolderOpen } from 'lucide-react';
-import { supabase } from '../lib/supabase';
+import { projects as projectsApi } from '../lib/api';
 
 interface Project {
   id: string;
@@ -104,17 +104,9 @@ const Portfolio: React.FC = () => {
 
   const fetchProjects = async () => {
     try {
-      const { data, error } = await supabase
-        .from('projects')
-        .select('id, title_ar, title_en, description_ar, description_en, image_url, technologies, status')
-        .eq('status', 'completed')
-        .order('created_at', { ascending: false })
-        .limit(12);
-
-      if (error) throw error;
-
+      const data = await projectsApi.list({ status: 'completed' }) as any[];
       if (data && data.length > 0) {
-        setProjects(data);
+        setProjects(data.slice(0, 12));
         setUseStatic(false);
       } else {
         setUseStatic(true);

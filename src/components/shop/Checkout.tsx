@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useCart } from '../../hooks/useCart';
-import { supabase } from '../../lib/supabase';
+import { orders as ordersApi, siteSettings } from '../../lib/api';
 import toast from 'react-hot-toast';
 import { ShoppingBag, User, Mail, Phone, FileText } from 'lucide-react';
 
@@ -22,12 +22,12 @@ const Checkout: React.FC = () => {
 
   useEffect(() => {
     const fetchWhatsapp = async () => {
-      const { data } = await supabase
-        .from('site_settings')
-        .select('setting_value')
-        .eq('setting_key', 'whatsapp_number')
-        .maybeSingle();
-      if (data?.setting_value) setWhatsappNumber(data.setting_value);
+      try {
+        const data = await siteSettings.get('company', 'whatsapp_number');
+        if (data?.setting_value) setWhatsappNumber(data.setting_value);
+      } catch (error) {
+        console.error('Error fetching whatsapp number:', error);
+      }
     };
     fetchWhatsapp();
   }, []);
@@ -54,7 +54,7 @@ const Checkout: React.FC = () => {
       const normalizedPhone = normalizeLibyanPhone(formData.phone);
 
       const orderPromises = cart.map(item =>
-        supabase.from('orders').insert([{
+        ordersApi.create({
           customer_name: formData.name,
           customer_email: formData.email,
           customer_phone: normalizedPhone,
@@ -63,15 +63,10 @@ const Checkout: React.FC = () => {
           total_amount: item.price * item.quantity,
           status: 'pending',
           notes: formData.notes
-        }])
+        })
       );
 
-      const results = await Promise.all(orderPromises);
-      const hasError = results.some(result => result.error);
-
-      if (hasError) {
-        throw new Error('Failed to save some orders');
-      }
+      await Promise.all(orderPromises);
 
       const productsList = cart.map(item => {
         const name = isRTL ? item.name_ar : item.name_en;

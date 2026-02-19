@@ -3,7 +3,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useCart } from '../../hooks/useCart';
 import { ArrowRight, ShoppingCart, Check } from 'lucide-react';
-import { supabase } from '../../lib/supabase';
+import { products as productsApi } from '../../lib/api';
 import type { Product } from '../../lib/supabase';
 
 const ProductDetail: React.FC = () => {
@@ -18,12 +18,7 @@ const ProductDetail: React.FC = () => {
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        const { data, error } = await supabase
-          .from('products')
-          .select('*')
-          .eq('id', id)
-          .maybeSingle();
-        if (error) throw error;
+        const data = await productsApi.get(id);
         setProduct(data);
       } catch {
         setProduct(null);

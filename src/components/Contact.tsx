@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Phone, Mail, MapPin, Clock, Send } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { supabase } from '../lib/supabase';
+import { siteSettings, contactMessages as contactMessagesApi } from '../lib/api';
 
 const Contact: React.FC = () => {
   const { t, i18n } = useTranslation();
@@ -23,14 +23,10 @@ const Contact: React.FC = () => {
 
   const fetchContactSettings = async () => {
     try {
-      const { data } = await supabase
-        .from('site_settings')
-        .select('setting_key, setting_value')
-        .eq('category', 'contact');
-
+      const data = await siteSettings.list('contact');
       if (data) {
         const settings: {[key: string]: string} = {};
-        data.forEach(item => {
+        data.forEach((item: any) => {
           settings[item.setting_key] = item.setting_value || '';
         });
         setContactSettings(settings);
@@ -45,17 +41,13 @@ const Contact: React.FC = () => {
     setIsSubmitting(true);
 
     try {
-      const { error } = await supabase
-        .from('contact_messages')
-        .insert([{
-          name: formData.name,
-          email: formData.email,
-          phone: formData.phone || null,
-          subject: formData.subject,
-          message: formData.message
-        }]);
-
-      if (error) throw error;
+      await contactMessagesApi.create({
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone || null,
+        subject: formData.subject,
+        message: formData.message
+      });
 
       toast.success(isRTL ? 'تم إرسال رسالتك بنجاح! سنتواصل معك قريباً' : 'Message sent successfully! We will contact you soon');
       setFormData({ name: '', email: '', phone: '', subject: '', message: '' });

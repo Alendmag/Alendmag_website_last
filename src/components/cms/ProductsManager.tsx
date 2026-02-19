@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Plus, Edit, Trash2, Save, X, Package } from 'lucide-react';
-import { supabase, Product } from '../../lib/supabase';
+import { products as productsApi } from '../../lib/api';
+import type { Product } from '../../lib/supabase';
 import toast from 'react-hot-toast';
 import Pagination from './shared/Pagination';
 
@@ -44,12 +45,7 @@ const ProductsManager: React.FC<ProductsManagerProps> = ({ openFormOnMount }) =>
 
   const fetchProducts = async () => {
     try {
-      const { data, error } = await supabase
-        .from('products')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
+      const data = await productsApi.list();
       setProducts(data || []);
     } catch (error) {
       console.error('Error fetching products:', error);
@@ -63,19 +59,10 @@ const ProductsManager: React.FC<ProductsManagerProps> = ({ openFormOnMount }) =>
     e.preventDefault();
     try {
       if (editingProduct) {
-        const { error } = await supabase
-          .from('products')
-          .update({ ...formData, updated_at: new Date().toISOString() })
-          .eq('id', editingProduct.id);
-
-        if (error) throw error;
+        await productsApi.update(editingProduct.id, formData);
         toast.success('تم تحديث المنتج بنجاح');
       } else {
-        const { error } = await supabase
-          .from('products')
-          .insert([formData]);
-
-        if (error) throw error;
+        await productsApi.create(formData);
         toast.success('تم إضافة المنتج بنجاح');
       }
 
@@ -93,12 +80,7 @@ const ProductsManager: React.FC<ProductsManagerProps> = ({ openFormOnMount }) =>
     if (!confirm('هل أنت متأكد من حذف هذا المنتج؟')) return;
 
     try {
-      const { error } = await supabase
-        .from('products')
-        .delete()
-        .eq('id', id);
-
-      if (error) throw error;
+      await productsApi.remove(id);
       toast.success('تم حذف المنتج بنجاح');
       fetchProducts();
     } catch (error) {

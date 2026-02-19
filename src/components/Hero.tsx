@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ArrowRight, TrendingUp, Users, Award } from 'lucide-react';
-import { supabase } from '../lib/supabase';
+import { siteSettings } from '../lib/api';
 
 const Hero: React.FC = () => {
   const { t, i18n } = useTranslation();
@@ -11,13 +11,10 @@ const Hero: React.FC = () => {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const { data } = await supabase
-          .from('site_settings')
-          .select('setting_key, setting_value')
-          .in('setting_key', ['stats_projects', 'stats_experience', 'stats_satisfaction']);
+        const data = await siteSettings.list('hero') as any[];
         if (data && data.length > 0) {
           const newStats = { ...statsValues };
-          data.forEach(item => {
+          data.forEach((item: any) => {
             if (item.setting_key === 'stats_projects' && item.setting_value) newStats.projects = item.setting_value;
             if (item.setting_key === 'stats_experience' && item.setting_value) newStats.experience = item.setting_value;
             if (item.setting_key === 'stats_satisfaction' && item.setting_value) newStats.satisfaction = item.setting_value;

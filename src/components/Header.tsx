@@ -4,7 +4,7 @@ import { Menu, X, Sun, Moon, Globe, ShoppingCart, ChevronDown, Headphones } from
 import { useTranslation } from 'react-i18next';
 import { useTheme } from '../hooks/useTheme';
 import { useCart } from '../hooks/useCart';
-import { supabase } from '../lib/supabase';
+import { siteSettings } from '../lib/api';
 
 const Header: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -28,12 +28,7 @@ const Header: React.FC = () => {
   useEffect(() => {
     const fetchLogo = async () => {
       try {
-        const { data } = await supabase
-          .from('site_settings')
-          .select('setting_value')
-          .eq('setting_key', 'logo_url')
-          .maybeSingle();
-
+        const data = await siteSettings.get('company', 'logo_url');
         if (data?.setting_value) {
           setLogoUrl(data.setting_value);
         }

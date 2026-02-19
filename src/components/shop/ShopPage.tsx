@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Search, Filter, ShoppingCart } from 'lucide-react';
 import { useCart } from '../../hooks/useCart';
 import { Link } from 'react-router-dom';
-import { supabase } from '../../lib/supabase';
+import { products as productsApi } from '../../lib/api';
 import type { Product } from '../../lib/supabase';
 
 const ShopPage: React.FC = () => {
@@ -20,12 +20,7 @@ const ShopPage: React.FC = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const { data, error } = await supabase
-          .from('products')
-          .select('*')
-          .eq('is_active', true)
-          .order('created_at', { ascending: false });
-        if (error) throw error;
+        const data = await productsApi.list({ is_active: true });
         setProducts(data || []);
       } catch {
         setProducts([]);

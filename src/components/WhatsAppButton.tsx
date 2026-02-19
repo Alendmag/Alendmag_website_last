@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { MessageCircle } from 'lucide-react';
-import { supabase } from '../lib/supabase';
+import { siteSettings } from '../lib/api';
 
 const WhatsAppButton: React.FC = () => {
   const [isVisible, setIsVisible] = useState(false);
@@ -9,14 +9,8 @@ const WhatsAppButton: React.FC = () => {
   useEffect(() => {
     const fetchNumber = async () => {
       try {
-        const { data } = await supabase
-          .from('site_settings')
-          .select('setting_value')
-          .eq('setting_key', 'whatsapp_number')
-          .maybeSingle();
-        if (data?.setting_value) {
-          setWhatsappNumber(data.setting_value);
-        }
+        const data: any = await siteSettings.get('contact', 'whatsapp_number');
+        if (data?.setting_value) setWhatsappNumber(data.setting_value);
       } catch {
         // keep default
       }
