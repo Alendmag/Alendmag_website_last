@@ -101,7 +101,7 @@ const CMSMain: React.FC<CMSMainProps> = ({ onLogout }) => {
       case 'preview':
         return <LivePreview />;
       default:
-        return <CMSDashboard />;
+        return <CMSDashboard onTabChange={handleTabChange} />;
     }
   };
 

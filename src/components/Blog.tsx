@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Calendar, User, ArrowRight, BookOpen } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 
 interface BlogPost {
@@ -89,7 +90,7 @@ const Blog: React.FC = () => {
           {posts.map((post) => (
             <article
               key={post.id}
-              className="group bg-white dark:bg-gray-800 rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border border-gray-100 dark:border-gray-700"
+              className="group bg-white dark:bg-gray-800 rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 border border-gray-100 dark:border-gray-700 cursor-pointer"
             >
               <div className="relative h-48 overflow-hidden bg-gradient-to-br from-blue-100 to-cyan-100 dark:from-gray-700 dark:to-gray-800">
                 {post.image_url ? (
@@ -131,14 +132,24 @@ const Blog: React.FC = () => {
                       <span>{formatDate(post.published_at)}</span>
                     </div>
                   </div>
-                  <button className="flex items-center gap-1 text-blue-600 dark:text-blue-400 text-xs font-medium hover:gap-2 transition-all">
+                  <Link to={`/blog/${post.id}`} className="flex items-center gap-1 text-blue-600 dark:text-blue-400 text-xs font-medium hover:gap-2 transition-all">
                     {isRTL ? 'اقرأ المزيد' : 'Read more'}
                     <ArrowRight className={`w-3.5 h-3.5 ${isRTL ? 'rotate-180' : ''}`} />
-                  </button>
+                  </Link>
                 </div>
               </div>
             </article>
           ))}
+        </div>
+
+        <div className="text-center mt-12">
+          <Link
+            to="/blog"
+            className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-blue-600 to-cyan-600 text-white rounded-xl font-semibold hover:shadow-xl hover:shadow-blue-500/30 transform hover:scale-105 transition-all duration-300"
+          >
+            {isRTL ? 'عرض جميع المقالات' : 'View All Articles'}
+            <ArrowRight className={`w-5 h-5 ${isRTL ? 'rotate-180' : ''}`} />
+          </Link>
         </div>
       </div>
     </section>

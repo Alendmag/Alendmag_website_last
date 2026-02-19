@@ -1,0 +1,239 @@
+{
+  "common": {
+    "companyName": "Alendmag Tech",
+    "companyFullName": "Alendmag Tech - Business Information Technology",
+    "loading": "Loading...",
+    "readMore": "Read More",
+    "contactUs": "Contact Us",
+    "copyright": "All rights reserved © 2024 Alendmag Tech",
+    "privacyPolicy": "Privacy Policy",
+    "termsOfService": "Terms of Service",
+    "viewAll": "View All",
+    "learnMore": "Learn More",
+    "getStarted": "Get Started"
+  },
+  "nav": {
+    "home": "Home",
+    "services": "Services",
+    "solutions": "Solutions",
+    "portfolio": "Portfolio",
+    "blog": "Blog",
+    "about": "About Us",
+    "contact": "Contact",
+    "dashboard": "Dashboard",
+    "shop": "Shop"
+  },
+  "hero": {
+    "title": "Integrated Tech Solutions",
+    "subtitle": "We provide the latest technical solutions to develop your business and achieve your goals",
+    "startProject": "Start Your Project",
+    "ourServices": "Our Services",
+    "stats": {
+      "projects": "Completed Projects",
+      "experience": "Years of Experience",
+      "satisfaction": "Client Satisfaction"
+    }
+  },
+  "services": {
+    "title": "Our Services",
+    "subtitle": "We offer a comprehensive range of technical services to meet your business needs",
+    "viewAll": "View All Services",
+    "categories": {
+      "webApps": "Web Applications",
+      "mobileApps": "Mobile Applications",
+      "desktopApps": "Desktop Software",
+      "salesSystems": "Sales Systems"
+    },
+    "items": {
+      "customSoftware": {
+        "title": "Custom Software",
+        "description": "Develop custom software solutions tailored to your business needs"
+      },
+      "erp": {
+        "title": "ERP System",
+        "description": "Integrated enterprise resource planning system"
+      },
+      "security": {
+        "title": "Security Solutions",
+        "description": "Advanced monitoring and protection systems"
+      },
+      "attendance": {
+        "title": "Attendance Systems",
+        "description": "Smart time and attendance management solutions"
+      },
+      "networking": {
+        "title": "Network Design",
+        "description": "Professional network infrastructure"
+      },
+      "accounting": {
+        "title": "Accounting",
+        "description": "Integrated accounting systems"
+      },
+      "hardware": {
+        "title": "Hardware & Equipment",
+        "description": "Computer hardware supply and maintenance"
+      },
+      "pos": {
+        "title": "Point of Sale",
+        "description": "Advanced POS systems"
+      }
+    }
+  },
+  "solutions": {
+    "title": "Solutions by Category",
+    "subtitle": "Specialized solutions for every sector",
+    "mainFeatures": "Main Features",
+    "individual": {
+      "title": "Individual Solutions",
+      "description": "Technical services tailored for personal and home use"
+    },
+    "sme": {
+      "title": "Small & Medium Businesses",
+      "description": "Integrated solutions for business development and growth"
+    },
+    "enterprise": {
+      "title": "Large Enterprises",
+      "description": "Advanced enterprise solutions for complex operations"
+    },
+    "government": {
+      "title": "Government Sector",
+      "description": "Secure solutions compliant with government standards"
+    }
+  },
+  "about": {
+    "title": "About Us",
+    "subtitle": "Leading company in information technology",
+    "description": "Alendmag Tech is a leading Libyan company in information technology based in Tripoli. We specialize in providing integrated technical solutions for businesses and institutions.",
+    "mission": "Our Mission",
+    "vision": "Our Vision",
+    "values": "Our Values",
+    "location": "Tripoli, Libya",
+    "companyDescription": "A leading company in information technology, providing integrated software solutions for companies and institutions in Libya and the Arab world.",
+    "achievements": "Our Achievements",
+    "achievementsLabels": {
+      "projects": "Projects",
+      "clients": "Clients",
+      "experience": "Years Experience"
+    }
+  },
+  "portfolio": {
+    "title": "Portfolio",
+    "subtitle": "We take pride in our successful projects",
+    "viewProject": "View Project",
+    "projects": {
+      "erp": {
+        "title": "Integrated ERP System",
+        "category": "Business Software",
+        "description": "Comprehensive enterprise resource management system for large companies"
+      },
+      "pos": {
+        "title": "Point of Sale System",
+        "category": "Retail Solutions",
+        "description": "Advanced POS system with inventory and accounting integration"
+      },
+      "security": {
+        "title": "Security & Monitoring System",
+        "category": "Security & Protection",
+        "description": "Advanced monitoring solutions with AI"
+      },
+      "mobile": {
+        "title": "E-Commerce Mobile App",
+        "category": "Mobile Apps",
+        "description": "Complete online store on iOS & Android"
+      }
+    }
+  },
+  "blog": {
+    "title": "Blog",
+    "subtitle": "Latest news and technical articles",
+    "readArticle": "Read Article",
+    "posts": {
+      "ai": {
+        "title": "Future of AI in Business",
+        "excerpt": "How companies can leverage AI technologies to improve performance",
+        "category": "Technology",
+        "author": "Alendmag Tech Team"
+      },
+      "cybersecurity": {
+        "title": "Importance of Cybersecurity",
+        "excerpt": "A comprehensive guide to protecting your company data from cyber threats",
+        "category": "Information Security",
+        "author": "Alendmag Tech Team"
+      },
+      "erp": {
+        "title": "ERP Systems: Beginner's Guide",
+        "excerpt": "What is an ERP system and why does your company need it?",
+        "category": "Business Software",
+        "author": "Alendmag Tech Team"
+      }
+    }
+  },
+  "contact": {
+    "title": "Contact Us",
+    "subtitle": "We are here to answer your questions",
+    "form": {
+      "name": "Name",
+      "email": "Email",
+      "phone": "Phone Number",
+      "subject": "Subject",
+      "message": "Message",
+      "send": "Send",
+      "sending": "Sending..."
+    },
+    "info": {
+      "phone": "Phone",
+      "email": "Email",
+      "address": "Address",
+      "workingHours": "Working Hours",
+      "management": "Management",
+      "sales": "Sales",
+      "support": "Technical Support",
+      "managementPhone": "00218920910096",
+      "salesPhone": "00218920910097",
+      "supportPhone": "00218920980096",
+      "emailAddress": "info@alendmag.ly",
+      "location": "Tripoli, Libya",
+      "mapLink": "https://maps.app.goo.gl/QneWVbq7T3M4v5LZA",
+      "viewOnMap": "View on Map"
+    }
+  },
+  "shop": {
+    "title": "Shop",
+    "subtitle": "Browse our products and software solutions",
+    "search": "Search products...",
+    "filter": "Filter",
+    "sortBy": "Sort By",
+    "addToCart": "Add to Cart",
+    "buyNow": "Buy Now",
+    "cart": "Cart",
+    "checkout": "Checkout",
+    "total": "Total",
+    "quantity": "Quantity",
+    "price": "Price",
+    "featured": "Featured",
+    "sale": "Sale",
+    "outOfStock": "Out of Stock"
+  },
+  "footer": {
+    "about": "About Company",
+    "quickLinks": "Quick Links",
+    "services": "Services",
+    "contact": "Contact Information",
+    "followUs": "Follow Us",
+    "tagline": "Business Information Technology",
+    "companyDescription": "A leading Libyan company in information technology, providing integrated software solutions for businesses and institutions.",
+    "servicesList": {
+      "customSoftware": "Custom Software",
+      "erp": "ERP Systems",
+      "security": "Security Systems",
+      "attendance": "Attendance & Leave",
+      "networking": "Network Design",
+      "accounting": "Accounting"
+    },
+    "contactLabels": {
+      "phone": "Phone",
+      "email": "Email",
+      "address": "Address"
+    }
+  }
+}
