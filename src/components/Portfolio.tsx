@@ -151,7 +151,7 @@ const Portfolio: React.FC = () => {
                 <div className="text-sm text-blue-600 dark:text-blue-400 font-medium mb-2">
                   {useStatic
                     ? (isRTL ? (project as any).category_ar : (project as any).category_en)
-                    : (isRTL ? t(`portfolio.projects.erp.category`) : t(`portfolio.projects.erp.category`))
+                    : (isRTL ? 'برمجيات الأعمال' : 'Business Software')
                   }
                 </div>
                 <h3 className="text-xl font-bold text-gray-800 dark:text-white mb-2">

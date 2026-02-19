@@ -74,7 +74,7 @@ const CMSLayout: React.FC<CMSLayoutProps> = ({ activeTab, onTabChange, onLogout,
       <div className="flex">
         {/* Sidebar */}
         <aside
-          className={`fixed lg:sticky top-0 ${isRTL ? 'right-0' : 'left-0'} h-screen w-64 bg-white dark:bg-gray-800 border-${isRTL ? 'l' : 'r'} border-gray-200 dark:border-gray-700 transform transition-transform duration-300 z-40 ${
+          className={`fixed lg:sticky top-0 ${isRTL ? 'right-0' : 'left-0'} h-screen w-64 bg-white dark:bg-gray-800 ${isRTL ? 'border-l' : 'border-r'} border-gray-200 dark:border-gray-700 transform transition-transform duration-300 z-40 ${
             sidebarOpen ? 'translate-x-0' : isRTL ? 'translate-x-full lg:translate-x-0' : '-translate-x-full lg:translate-x-0'
           }`}
         >
