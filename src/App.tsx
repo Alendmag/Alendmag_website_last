@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { CartProvider } from './context/CartContext';
@@ -15,15 +15,23 @@ import Support from './components/Support';
 import AboutContact from './components/AboutContact';
 import Footer from './components/Footer';
 import WhatsAppButton from './components/WhatsAppButton';
-import ShopPage from './components/shop/ShopPage';
-import ProductDetail from './components/shop/ProductDetail';
-import Cart from './components/shop/Cart';
-import Checkout from './components/shop/Checkout';
-import Dashboard from './components/Dashboard';
-import BlogPage from './components/blog/BlogPage';
-import BlogDetail from './components/blog/BlogDetail';
 import { useSEO } from './hooks/useSEO';
 import { supabase } from './lib/supabase';
+
+const ShopPage = lazy(() => import('./components/shop/ShopPage'));
+const ProductDetail = lazy(() => import('./components/shop/ProductDetail'));
+const Cart = lazy(() => import('./components/shop/Cart'));
+const Checkout = lazy(() => import('./components/shop/Checkout'));
+const Dashboard = lazy(() => import('./components/Dashboard'));
+const BlogPage = lazy(() => import('./components/blog/BlogPage'));
+const BlogDetail = lazy(() => import('./components/blog/BlogDetail'));
+const NotFound = lazy(() => import('./components/NotFound'));
+
+const PageLoader: React.FC = () => (
+  <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+    <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+  </div>
+);
 
 const HomePage: React.FC = () => {
   useSEO({
@@ -92,16 +100,19 @@ function App() {
             <Header />
 
             <main>
-              <Routes>
-                <Route path="/" element={<HomePage />} />
-                <Route path="/shop" element={<ShopPage />} />
-                <Route path="/product/:id" element={<ProductDetail />} />
-                <Route path="/cart" element={<Cart />} />
-                <Route path="/checkout" element={<Checkout />} />
-                <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/blog" element={<BlogPage />} />
-                <Route path="/blog/:slug" element={<BlogDetail />} />
-              </Routes>
+              <Suspense fallback={<PageLoader />}>
+                <Routes>
+                  <Route path="/" element={<HomePage />} />
+                  <Route path="/shop" element={<ShopPage />} />
+                  <Route path="/product/:id" element={<ProductDetail />} />
+                  <Route path="/cart" element={<Cart />} />
+                  <Route path="/checkout" element={<Checkout />} />
+                  <Route path="/dashboard" element={<Dashboard />} />
+                  <Route path="/blog" element={<BlogPage />} />
+                  <Route path="/blog/:slug" element={<BlogDetail />} />
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </Suspense>
             </main>
 
             <Footer />

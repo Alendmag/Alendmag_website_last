@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Calendar, User, ArrowRight, Tag, BookOpen, ArrowLeft } from 'lucide-react';
+import { Calendar, User, ArrowRight, Tag, BookOpen, ArrowLeft, Eye, Share2, Twitter, Facebook, Link2, Check } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import type { BlogPost } from '../../lib/supabase';
 
@@ -29,6 +29,7 @@ const BlogDetail: React.FC = () => {
   const [post, setPost] = useState<BlogPost | null>(null);
   const [relatedPosts, setRelatedPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     const fetchPost = async () => {
@@ -45,6 +46,7 @@ const BlogDetail: React.FC = () => {
         if (data) {
           setPost(data);
           fetchRelated(data.category, data.id);
+          incrementViewCount(data.id);
         }
       } catch {
         setPost(null);
@@ -55,11 +57,15 @@ const BlogDetail: React.FC = () => {
     fetchPost();
   }, [slug]);
 
+  const incrementViewCount = async (postId: string) => {
+    await supabase.rpc('increment_blog_views', { post_id: postId }).maybeSingle();
+  };
+
   const fetchRelated = async (category: string, excludeId: string) => {
     try {
       const { data } = await supabase
         .from('blog_posts')
-        .select('id, title_ar, title_en, excerpt_ar, excerpt_en, image_url, category, published_at')
+        .select('id, title_ar, title_en, excerpt_ar, excerpt_en, image_url, category, published_at, view_count')
         .eq('is_published', true)
         .eq('category', category)
         .neq('id', excludeId)
@@ -75,6 +81,23 @@ const BlogDetail: React.FC = () => {
     return isRTL
       ? date.toLocaleDateString('ar-SA', { year: 'numeric', month: 'long', day: 'numeric' })
       : date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  };
+
+  const currentUrl = window.location.href;
+  const postTitle = post ? (isRTL ? post.title_ar : post.title_en) : '';
+
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(currentUrl);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const shareOnTwitter = () => {
+    window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(postTitle)}&url=${encodeURIComponent(currentUrl)}`, '_blank');
+  };
+
+  const shareOnFacebook = () => {
+    window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(currentUrl)}`, '_blank');
   };
 
   if (loading) {
@@ -140,17 +163,53 @@ const BlogDetail: React.FC = () => {
               {isRTL ? post.title_ar : post.title_en}
             </h1>
 
-            <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500 dark:text-gray-400 pb-6 border-b border-gray-200 dark:border-gray-700 mb-8">
-              <div className="flex items-center gap-2">
-                <User className="w-4 h-4" />
-                <span>{isRTL ? 'فريق الإندماج التقني' : 'Alendmag Team'}</span>
-              </div>
-              {post.published_at && (
+            <div className="flex flex-wrap items-center justify-between gap-4 pb-6 border-b border-gray-200 dark:border-gray-700 mb-8">
+              <div className="flex flex-wrap items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
                 <div className="flex items-center gap-2">
-                  <Calendar className="w-4 h-4" />
-                  <span>{formatDate(post.published_at)}</span>
+                  <User className="w-4 h-4" />
+                  <span>{isRTL ? 'فريق الإندماج التقني' : 'Alendmag Team'}</span>
                 </div>
-              )}
+                {post.published_at && (
+                  <div className="flex items-center gap-2">
+                    <Calendar className="w-4 h-4" />
+                    <span>{formatDate(post.published_at)}</span>
+                  </div>
+                )}
+                {(post as any).view_count !== undefined && (
+                  <div className="flex items-center gap-2">
+                    <Eye className="w-4 h-4" />
+                    <span>{(post as any).view_count} {isRTL ? 'مشاهدة' : 'views'}</span>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-gray-500 dark:text-gray-400 flex items-center gap-1">
+                  <Share2 className="w-4 h-4" />
+                  {isRTL ? 'مشاركة' : 'Share'}
+                </span>
+                <button
+                  onClick={shareOnTwitter}
+                  className="p-2 rounded-lg bg-sky-50 dark:bg-sky-900/30 text-sky-500 hover:bg-sky-100 dark:hover:bg-sky-900/50 transition"
+                  title="Twitter / X"
+                >
+                  <Twitter className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={shareOnFacebook}
+                  className="p-2 rounded-lg bg-blue-50 dark:bg-blue-900/30 text-blue-600 hover:bg-blue-100 dark:hover:bg-blue-900/50 transition"
+                  title="Facebook"
+                >
+                  <Facebook className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={handleCopyLink}
+                  className="p-2 rounded-lg bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-600 transition"
+                  title={isRTL ? 'نسخ الرابط' : 'Copy link'}
+                >
+                  {copied ? <Check className="w-4 h-4 text-green-500" /> : <Link2 className="w-4 h-4" />}
+                </button>
+              </div>
             </div>
 
             {(isRTL ? post.excerpt_ar : post.excerpt_en) && (
@@ -173,6 +232,27 @@ const BlogDetail: React.FC = () => {
                 ))}
               </div>
             )}
+
+            <div className="mt-8 pt-8 border-t border-gray-200 dark:border-gray-700">
+              <div className="flex items-center gap-4">
+                <span className="text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-2">
+                  <Share2 className="w-4 h-4" />
+                  {isRTL ? 'شارك هذا المقال' : 'Share this article'}
+                </span>
+                <button onClick={shareOnTwitter} className="flex items-center gap-2 px-4 py-2 bg-sky-500 text-white rounded-lg text-sm font-medium hover:bg-sky-600 transition">
+                  <Twitter className="w-4 h-4" />
+                  Twitter
+                </button>
+                <button onClick={shareOnFacebook} className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition">
+                  <Facebook className="w-4 h-4" />
+                  Facebook
+                </button>
+                <button onClick={handleCopyLink} className="flex items-center gap-2 px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-medium hover:bg-gray-300 dark:hover:bg-gray-600 transition">
+                  {copied ? <Check className="w-4 h-4 text-green-500" /> : <Link2 className="w-4 h-4" />}
+                  {copied ? (isRTL ? 'تم النسخ!' : 'Copied!') : (isRTL ? 'نسخ الرابط' : 'Copy link')}
+                </button>
+              </div>
+            </div>
           </div>
         </article>
 
@@ -211,11 +291,19 @@ const BlogDetail: React.FC = () => {
                     <h3 className="font-bold text-gray-800 dark:text-white line-clamp-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition">
                       {isRTL ? related.title_ar : related.title_en}
                     </h3>
-                    {related.published_at && (
-                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
-                        {formatDate(related.published_at)}
-                      </p>
-                    )}
+                    <div className="flex items-center justify-between mt-2">
+                      {related.published_at && (
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                          {formatDate(related.published_at)}
+                        </p>
+                      )}
+                      {(related as any).view_count !== undefined && (
+                        <p className="text-xs text-gray-400 dark:text-gray-500 flex items-center gap-1">
+                          <Eye className="w-3 h-3" />
+                          {(related as any).view_count}
+                        </p>
+                      )}
+                    </div>
                   </div>
                 </Link>
               ))}

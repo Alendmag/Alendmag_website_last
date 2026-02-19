@@ -7,7 +7,15 @@ import {
   Users,
   TrendingUp,
   Activity,
-  UserCheck
+  UserCheck,
+  MessageSquare,
+  Ticket,
+  BookOpen,
+  Star,
+  DollarSign,
+  AlertCircle,
+  CheckCircle2,
+  Clock
 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 
@@ -30,9 +38,14 @@ const CMSDashboard: React.FC<CMSDashboardProps> = ({ onTabChange }) => {
     testimonials: 0,
     faq: 0,
     supportTickets: 0,
+    openTickets: 0,
     projectTasks: 0,
     completedProjects: 0,
-    revenue: 0
+    revenue: 0,
+    messages: 0,
+    unreadMessages: 0,
+    blogPosts: 0,
+    publishedPosts: 0
   });
 
   const [loading, setLoading] = useState(true);
@@ -52,7 +65,9 @@ const CMSDashboard: React.FC<CMSDashboardProps> = ({ onTabChange }) => {
         testimonials,
         faq,
         supportTickets,
-        projectTasks
+        projectTasks,
+        messages,
+        blogPosts
       ] = await Promise.all([
         supabase.from('products').select('*', { count: 'exact', head: true }),
         supabase.from('orders').select('*', { count: 'exact', head: true }),
@@ -62,13 +77,18 @@ const CMSDashboard: React.FC<CMSDashboardProps> = ({ onTabChange }) => {
         supabase.from('testimonials').select('*', { count: 'exact', head: true }),
         supabase.from('faq').select('*', { count: 'exact', head: true }),
         supabase.from('support_tickets').select('*', { count: 'exact', head: true }),
-        supabase.from('project_tasks').select('*', { count: 'exact', head: true })
+        supabase.from('project_tasks').select('*', { count: 'exact', head: true }),
+        supabase.from('contact_messages').select('*', { count: 'exact', head: true }),
+        supabase.from('blog_posts').select('*', { count: 'exact', head: true })
       ]);
 
-      const [pendingOrders, activeProjects, completedProjects] = await Promise.all([
+      const [pendingOrders, activeProjects, completedProjects, openTickets, unreadMessages, publishedPosts] = await Promise.all([
         supabase.from('orders').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
         supabase.from('projects').select('*', { count: 'exact', head: true }).eq('status', 'in-progress'),
-        supabase.from('projects').select('*', { count: 'exact', head: true }).eq('status', 'completed')
+        supabase.from('projects').select('*', { count: 'exact', head: true }).eq('status', 'completed'),
+        supabase.from('support_tickets').select('*', { count: 'exact', head: true }).eq('status', 'open'),
+        supabase.from('contact_messages').select('*', { count: 'exact', head: true }).eq('is_read', false),
+        supabase.from('blog_posts').select('*', { count: 'exact', head: true }).eq('is_published', true)
       ]);
 
       const { data: ordersData } = await supabase
@@ -89,9 +109,14 @@ const CMSDashboard: React.FC<CMSDashboardProps> = ({ onTabChange }) => {
         testimonials: testimonials.count || 0,
         faq: faq.count || 0,
         supportTickets: supportTickets.count || 0,
+        openTickets: openTickets.count || 0,
         projectTasks: projectTasks.count || 0,
         completedProjects: completedProjects.count || 0,
-        revenue
+        revenue,
+        messages: messages.count || 0,
+        unreadMessages: unreadMessages.count || 0,
+        blogPosts: blogPosts.count || 0,
+        publishedPosts: publishedPosts.count || 0
       });
     } catch (error) {
       console.error('Error fetching stats:', error);
@@ -102,55 +127,55 @@ const CMSDashboard: React.FC<CMSDashboardProps> = ({ onTabChange }) => {
 
   const mainStats = [
     {
-      icon: Package,
-      label: isRTL ? 'المنتجات' : 'Products',
-      value: stats.products,
-      color: 'from-blue-500 to-cyan-500',
-      link: 'products'
+      icon: DollarSign,
+      label: isRTL ? 'الإيرادات (مكتملة)' : 'Revenue (Completed)',
+      value: `${stats.revenue.toFixed(0)} ${isRTL ? 'د.ل' : 'LYD'}`,
+      color: 'from-emerald-500 to-green-600',
+      link: 'orders'
     },
     {
       icon: ShoppingCart,
-      label: isRTL ? 'الطلبات' : 'Orders',
+      label: isRTL ? 'إجمالي الطلبات' : 'Total Orders',
       value: stats.orders,
-      color: 'from-green-500 to-emerald-500',
+      color: 'from-blue-500 to-cyan-500',
       link: 'orders'
     },
     {
       icon: UserCheck,
       label: isRTL ? 'العملاء' : 'Clients',
       value: stats.clients,
-      color: 'from-purple-500 to-pink-500',
+      color: 'from-orange-500 to-amber-500',
       link: 'clients'
     },
     {
       icon: FolderOpen,
       label: isRTL ? 'المشاريع' : 'Projects',
       value: stats.projects,
-      color: 'from-orange-500 to-red-500',
+      color: 'from-rose-500 to-pink-500',
       link: 'projects'
     }
   ];
 
-  const quickStats = [
-    {
-      label: isRTL ? 'طلبات في الانتظار' : 'Pending Orders',
-      value: stats.pendingOrders,
-      icon: ShoppingCart,
-      color: 'text-yellow-600 dark:text-yellow-400'
+  const alertItems = [
+    stats.pendingOrders > 0 && {
+      icon: Clock,
+      label: isRTL ? `${stats.pendingOrders} طلب في الانتظار` : `${stats.pendingOrders} pending orders`,
+      color: 'text-yellow-600 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/20',
+      link: 'orders'
     },
-    {
-      label: isRTL ? 'مشاريع نشطة' : 'Active Projects',
-      value: stats.activeProjects,
-      icon: FolderOpen,
-      color: 'text-blue-600 dark:text-blue-400'
+    stats.openTickets > 0 && {
+      icon: AlertCircle,
+      label: isRTL ? `${stats.openTickets} تذكرة مفتوحة` : `${stats.openTickets} open tickets`,
+      color: 'text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20',
+      link: 'tickets'
     },
-    {
-      label: isRTL ? 'أعضاء الفريق' : 'Team Members',
-      value: stats.teamMembers,
-      icon: Users,
-      color: 'text-green-600 dark:text-green-400'
+    stats.unreadMessages > 0 && {
+      icon: MessageSquare,
+      label: isRTL ? `${stats.unreadMessages} رسالة غير مقروءة` : `${stats.unreadMessages} unread messages`,
+      color: 'text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20',
+      link: 'messages'
     }
-  ];
+  ].filter(Boolean) as any[];
 
   if (loading) {
     return (
@@ -162,7 +187,6 @@ const CMSDashboard: React.FC<CMSDashboardProps> = ({ onTabChange }) => {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div>
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
           {isRTL ? 'لوحة التحكم الرئيسية' : 'Dashboard Overview'}
@@ -172,7 +196,24 @@ const CMSDashboard: React.FC<CMSDashboardProps> = ({ onTabChange }) => {
         </p>
       </div>
 
-      {/* Main Stats Grid */}
+      {alertItems.length > 0 && (
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {alertItems.map((item, idx) => {
+            const Icon = item.icon;
+            return (
+              <button
+                key={idx}
+                onClick={() => onTabChange?.(item.link)}
+                className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-left transition hover:opacity-80 ${item.color}`}
+              >
+                <Icon className="w-5 h-5 flex-shrink-0" />
+                {item.label}
+              </button>
+            );
+          })}
+        </div>
+      )}
+
       <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
         {mainStats.map((stat, index) => {
           const Icon = stat.icon;
@@ -188,165 +229,120 @@ const CMSDashboard: React.FC<CMSDashboardProps> = ({ onTabChange }) => {
                 </div>
                 <TrendingUp className="w-5 h-5 text-green-600 dark:text-green-400" />
               </div>
-              <div className="text-3xl font-bold text-gray-900 dark:text-white mb-1">{stat.value}</div>
+              <div className="text-2xl font-bold text-gray-900 dark:text-white mb-1">{stat.value}</div>
               <div className="text-sm text-gray-600 dark:text-gray-400">{stat.label}</div>
             </button>
           );
         })}
       </div>
 
-      {/* Quick Stats */}
-      <div className="grid md:grid-cols-3 gap-6">
-        {quickStats.map((item, index) => {
+      <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+        {[
+          { icon: Package, label: isRTL ? 'المنتجات' : 'Products', value: stats.products, link: 'products', color: 'text-blue-600' },
+          { icon: BookOpen, label: isRTL ? 'مقالات المدونة' : 'Blog Posts', value: `${stats.publishedPosts}/${stats.blogPosts}`, link: 'blog', color: 'text-cyan-600' },
+          { icon: Ticket, label: isRTL ? 'تذاكر الدعم' : 'Support Tickets', value: stats.supportTickets, link: 'tickets', color: 'text-red-500' },
+          { icon: Star, label: isRTL ? 'آراء العملاء' : 'Testimonials', value: stats.testimonials, link: 'testimonials', color: 'text-amber-500' },
+          { icon: Users, label: isRTL ? 'الفريق' : 'Team', value: stats.teamMembers, link: 'team', color: 'text-green-600' },
+          { icon: MessageSquare, label: isRTL ? 'الرسائل' : 'Messages', value: stats.messages, link: 'messages', color: 'text-sky-500' },
+          { icon: CheckCircle2, label: isRTL ? 'مشاريع مكتملة' : 'Completed Projects', value: stats.completedProjects, link: 'projects', color: 'text-emerald-600' },
+          { icon: Activity, label: isRTL ? 'المشاريع النشطة' : 'Active Projects', value: stats.activeProjects, link: 'projects', color: 'text-orange-500' }
+        ].map((item, idx) => {
           const Icon = item.icon;
           return (
-            <div
-              key={index}
-              className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-700 rounded-2xl p-6 border border-gray-200 dark:border-gray-600"
+            <button
+              key={idx}
+              onClick={() => onTabChange?.(item.link)}
+              className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow border border-gray-200 dark:border-gray-700 hover:shadow-md transition text-left flex items-center gap-4 group"
             >
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-white dark:bg-gray-800 rounded-xl flex items-center justify-center shadow">
-                  <Icon className={`w-6 h-6 ${item.color}`} />
-                </div>
-                <div>
-                  <div className="text-2xl font-bold text-gray-900 dark:text-white">{item.value}</div>
-                  <div className="text-sm text-gray-600 dark:text-gray-400">{item.label}</div>
-                </div>
+              <div className="w-10 h-10 bg-gray-50 dark:bg-gray-700 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                <Icon className={`w-5 h-5 ${item.color}`} />
               </div>
-            </div>
+              <div>
+                <div className="text-xl font-bold text-gray-900 dark:text-white">{item.value}</div>
+                <div className="text-xs text-gray-500 dark:text-gray-400">{item.label}</div>
+              </div>
+            </button>
           );
         })}
       </div>
 
-      {/* System Overview */}
-      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700">
-        <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-          <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
-            <Activity className="w-5 h-5" />
-            {isRTL ? 'نظرة عامة على النظام' : 'System Overview'}
+      <div className="grid md:grid-cols-2 gap-6">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-6">
+          <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+            <ShoppingCart className="w-5 h-5 text-blue-600" />
+            {isRTL ? 'حالة الطلبات' : 'Orders Status'}
           </h2>
+          <div className="space-y-3">
+            {[
+              { label: isRTL ? 'في الانتظار' : 'Pending', value: stats.pendingOrders, total: stats.orders, color: 'from-yellow-500 to-orange-500' },
+              { label: isRTL ? 'مكتمل' : 'Completed', value: stats.orders - stats.pendingOrders, total: stats.orders, color: 'from-green-500 to-emerald-500' }
+            ].map((item, idx) => (
+              <div key={idx}>
+                <div className="flex justify-between text-sm mb-1">
+                  <span className="text-gray-600 dark:text-gray-400">{item.label}</span>
+                  <span className="font-medium text-gray-900 dark:text-white">{item.value} / {item.total}</span>
+                </div>
+                <div className="w-full bg-gray-100 dark:bg-gray-700 rounded-full h-2">
+                  <div
+                    className={`bg-gradient-to-r ${item.color} h-2 rounded-full transition-all duration-500`}
+                    style={{ width: `${item.total > 0 ? Math.round((item.value / item.total) * 100) : 0}%` }}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
-        <div className="p-6">
-          <div className="grid md:grid-cols-2 gap-6">
-            {/* Products Overview */}
-            <div className="space-y-3">
-              <h3 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                <Package className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-                {isRTL ? 'المنتجات' : 'Products'}
-              </h3>
-              <div className="space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-600 dark:text-gray-400">{isRTL ? 'إجمالي المنتجات' : 'Total Products'}</span>
-                  <span className="font-medium text-gray-900 dark:text-white">{stats.products}</span>
-                </div>
-                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                  <div className="bg-gradient-to-r from-blue-600 to-cyan-600 h-2 rounded-full" style={{ width: '100%' }} />
-                </div>
-              </div>
-            </div>
 
-            {/* Orders Overview */}
-            <div className="space-y-3">
-              <h3 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                <ShoppingCart className="w-5 h-5 text-green-600 dark:text-green-400" />
-                {isRTL ? 'الطلبات' : 'Orders'}
-              </h3>
-              <div className="space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-600 dark:text-gray-400">{isRTL ? 'في الانتظار' : 'Pending'}</span>
-                  <span className="font-medium text-gray-900 dark:text-white">{stats.pendingOrders} / {stats.orders}</span>
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-6">
+          <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+            <FolderOpen className="w-5 h-5 text-orange-500" />
+            {isRTL ? 'حالة المشاريع' : 'Projects Status'}
+          </h2>
+          <div className="space-y-3">
+            {[
+              { label: isRTL ? 'قيد التنفيذ' : 'In Progress', value: stats.activeProjects, total: stats.projects, color: 'from-blue-500 to-cyan-500' },
+              { label: isRTL ? 'مكتملة' : 'Completed', value: stats.completedProjects, total: stats.projects, color: 'from-green-500 to-emerald-500' }
+            ].map((item, idx) => (
+              <div key={idx}>
+                <div className="flex justify-between text-sm mb-1">
+                  <span className="text-gray-600 dark:text-gray-400">{item.label}</span>
+                  <span className="font-medium text-gray-900 dark:text-white">{item.value} / {item.total}</span>
                 </div>
-                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                <div className="w-full bg-gray-100 dark:bg-gray-700 rounded-full h-2">
                   <div
-                    className="bg-gradient-to-r from-yellow-500 to-orange-500 h-2 rounded-full"
-                    style={{ width: `${stats.orders > 0 ? (stats.pendingOrders / stats.orders) * 100 : 0}%` }}
+                    className={`bg-gradient-to-r ${item.color} h-2 rounded-full transition-all duration-500`}
+                    style={{ width: `${item.total > 0 ? Math.round((item.value / item.total) * 100) : 0}%` }}
                   />
                 </div>
               </div>
-            </div>
-
-            {/* Clients Overview */}
-            <div className="space-y-3">
-              <h3 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                <UserCheck className="w-5 h-5 text-purple-600 dark:text-purple-400" />
-                {isRTL ? 'العملاء' : 'Clients'}
-              </h3>
-              <div className="space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-600 dark:text-gray-400">{isRTL ? 'إجمالي العملاء' : 'Total Clients'}</span>
-                  <span className="font-medium text-gray-900 dark:text-white">{stats.clients}</span>
-                </div>
-                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                  <div className="bg-gradient-to-r from-purple-600 to-pink-600 h-2 rounded-full" style={{ width: '100%' }} />
-                </div>
-              </div>
-            </div>
-
-            {/* Projects Overview */}
-            <div className="space-y-3">
-              <h3 className="font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                <FolderOpen className="w-5 h-5 text-orange-600 dark:text-orange-400" />
-                {isRTL ? 'المشاريع' : 'Projects'}
-              </h3>
-              <div className="space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-600 dark:text-gray-400">{isRTL ? 'قيد التنفيذ' : 'In Progress'}</span>
-                  <span className="font-medium text-gray-900 dark:text-white">{stats.activeProjects} / {stats.projects}</span>
-                </div>
-                <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                  <div
-                    className="bg-gradient-to-r from-blue-500 to-indigo-500 h-2 rounded-full"
-                    style={{ width: `${stats.projects > 0 ? (stats.activeProjects / stats.projects) * 100 : 0}%` }}
-                  />
-                </div>
-              </div>
-            </div>
+            ))}
           </div>
         </div>
       </div>
 
-      {/* Quick Actions */}
       <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200 dark:border-gray-700 p-6">
         <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
           {isRTL ? 'إجراءات سريعة' : 'Quick Actions'}
         </h2>
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <button
-            onClick={() => onTabChange?.('products', true)}
-            className="bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 border-2 border-blue-200 dark:border-blue-800 rounded-xl p-4 hover:shadow-lg transition text-center group"
-          >
-            <Package className="w-8 h-8 mx-auto mb-2 text-blue-600 dark:text-blue-400 group-hover:scale-110 transition-transform" />
-            <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-              {isRTL ? 'إضافة منتج جديد' : 'Add New Product'}
-            </p>
-          </button>
-          <button
-            onClick={() => onTabChange?.('clients', true)}
-            className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border-2 border-green-200 dark:border-green-800 rounded-xl p-4 hover:shadow-lg transition text-center group"
-          >
-            <UserCheck className="w-8 h-8 mx-auto mb-2 text-green-600 dark:text-green-400 group-hover:scale-110 transition-transform" />
-            <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-              {isRTL ? 'إضافة عميل جديد' : 'Add New Client'}
-            </p>
-          </button>
-          <button
-            onClick={() => onTabChange?.('projects', true)}
-            className="bg-gradient-to-br from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 border-2 border-purple-200 dark:border-purple-800 rounded-xl p-4 hover:shadow-lg transition text-center group"
-          >
-            <FolderOpen className="w-8 h-8 mx-auto mb-2 text-purple-600 dark:text-purple-400 group-hover:scale-110 transition-transform" />
-            <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-              {isRTL ? 'إضافة مشروع جديد' : 'Add New Project'}
-            </p>
-          </button>
-          <button
-            onClick={() => onTabChange?.('team', true)}
-            className="bg-gradient-to-br from-orange-50 to-red-50 dark:from-orange-900/20 dark:to-red-900/20 border-2 border-orange-200 dark:border-orange-800 rounded-xl p-4 hover:shadow-lg transition text-center group"
-          >
-            <Users className="w-8 h-8 mx-auto mb-2 text-orange-600 dark:text-orange-400 group-hover:scale-110 transition-transform" />
-            <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-              {isRTL ? 'إضافة عضو فريق' : 'Add Team Member'}
-            </p>
-          </button>
+        <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-4">
+          {[
+            { icon: Package, label: isRTL ? 'إضافة منتج' : 'Add Product', link: 'products', color: 'from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 border-blue-200 dark:border-blue-800', iconColor: 'text-blue-600 dark:text-blue-400' },
+            { icon: UserCheck, label: isRTL ? 'إضافة عميل' : 'Add Client', link: 'clients', color: 'from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border-green-200 dark:border-green-800', iconColor: 'text-green-600 dark:text-green-400' },
+            { icon: FolderOpen, label: isRTL ? 'إضافة مشروع' : 'Add Project', link: 'projects', color: 'from-orange-50 to-red-50 dark:from-orange-900/20 dark:to-red-900/20 border-orange-200 dark:border-orange-800', iconColor: 'text-orange-600 dark:text-orange-400' },
+            { icon: BookOpen, label: isRTL ? 'كتابة مقال' : 'Write Article', link: 'blog', color: 'from-sky-50 to-blue-50 dark:from-sky-900/20 dark:to-blue-900/20 border-sky-200 dark:border-sky-800', iconColor: 'text-sky-600 dark:text-sky-400' }
+          ].map((action, idx) => {
+            const Icon = action.icon;
+            return (
+              <button
+                key={idx}
+                onClick={() => onTabChange?.(action.link, true)}
+                className={`bg-gradient-to-br ${action.color} border-2 rounded-xl p-4 hover:shadow-lg transition text-center group`}
+              >
+                <Icon className={`w-8 h-8 mx-auto mb-2 ${action.iconColor} group-hover:scale-110 transition-transform`} />
+                <p className="text-sm font-medium text-gray-700 dark:text-gray-300">{action.label}</p>
+              </button>
+            );
+          })}
         </div>
       </div>
     </div>
