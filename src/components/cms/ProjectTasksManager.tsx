@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Plus, Edit, Trash2, Save, X, CheckCircle2, Clock, AlertCircle, User } from 'lucide-react';
+import { Plus, CreditCard as Edit, Trash2, Save, X, CircleCheck as CheckCircle2, Clock, CircleAlert as AlertCircle, User } from 'lucide-react';
 import { projectTasks as projectTasksApi, teamMembers as teamMembersApi } from '../../lib/api';
 import toast from 'react-hot-toast';
 
@@ -54,7 +54,7 @@ const ProjectTasksManager: React.FC<ProjectTasksManagerProps> = ({ projectId, pr
 
   const fetchTasks = async () => {
     try {
-      const data = await projectTasksApi.list({ project_id: projectId });
+      const data = await projectTasksApi.list(projectId);
       setTasks(data || []);
     } catch (error) {
       console.error('Error fetching tasks:', error);
@@ -118,9 +118,9 @@ const ProjectTasksManager: React.FC<ProjectTasksManagerProps> = ({ projectId, pr
     setFormData({
       title: task.title,
       description: task.description,
-      status: task.status,
+      status: task.status as any,
       assigned_to: task.assigned_to,
-      priority: task.priority,
+      priority: task.priority as any,
       due_date: task.due_date
     });
     setShowForm(true);

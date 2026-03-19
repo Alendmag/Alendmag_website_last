@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Search, Filter, ShoppingCart } from 'lucide-react';
+import { Search, ListFilter as Filter, ShoppingCart } from 'lucide-react';
 import { useCart } from '../../hooks/useCart';
 import { Link } from 'react-router-dom';
 import { products as productsApi } from '../../lib/api';
@@ -20,7 +20,7 @@ const ShopPage: React.FC = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const data = await productsApi.list({ is_active: true });
+        const data = await productsApi.list({ active: true });
         setProducts(data || []);
       } catch {
         setProducts([]);

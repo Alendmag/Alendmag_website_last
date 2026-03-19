@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Ticket, HelpCircle, Play, Send, ChevronDown, X, Search, MessageCircle } from 'lucide-react';
+import { Ticket, Circle as HelpCircle, Play, Send, ChevronDown, X, Search, MessageCircle } from 'lucide-react';
 import { faq as faqApi, supportVideos as supportVideosApi, supportTickets as supportTicketsApi } from '../lib/api';
 import toast from 'react-hot-toast';
 
@@ -48,7 +48,7 @@ const Support: React.FC = () => {
 
   const fetchFaqs = async () => {
     try {
-      const data = await faqApi.list({ is_active: true });
+      const data = await faqApi.list();
       if (data) setFaqs(data);
     } catch (error) {
       console.error('Error fetching FAQs:', error);
@@ -57,7 +57,7 @@ const Support: React.FC = () => {
 
   const fetchVideos = async () => {
     try {
-      const data = await supportVideosApi.list({ is_active: true });
+      const data = await supportVideosApi.list();
       if (data) setVideos(data);
     } catch (error) {
       console.error('Error fetching videos:', error);

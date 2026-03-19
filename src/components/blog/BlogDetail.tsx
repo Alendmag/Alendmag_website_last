@@ -61,7 +61,7 @@ const BlogDetail: React.FC = () => {
 
   const fetchRelated = async (category: string, excludeId: string) => {
     try {
-      const result = await blogPostsApi.list({ category, exclude_id: excludeId, limit: 3 });
+      const result = await blogPostsApi.list({ category, limit: 5 });
       const data = (result as any)?.data || result;
       setRelatedPosts((data || []).filter((p: any) => p.id !== excludeId).slice(0, 3));
     } catch {

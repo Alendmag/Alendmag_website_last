@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Ticket, Search, Send, Clock, AlertCircle, CheckCircle, X, User } from 'lucide-react';
+import { Ticket, Search, Send, Clock, CircleAlert as AlertCircle, CircleCheck as CheckCircle, X, User } from 'lucide-react';
 import { supportTickets as supportTicketsApi, ticketReplies as ticketRepliesApi, teamMembers as teamMembersApi } from '../../lib/api';
 import toast from 'react-hot-toast';
 
@@ -87,7 +87,7 @@ const TicketsManager: React.FC = () => {
 
   const fetchReplies = async (ticketId: string) => {
     try {
-      const data = await ticketRepliesApi.list({ ticket_id: ticketId });
+      const data = await ticketRepliesApi.list(ticketId);
       if (data) setReplies(data);
     } catch (error) {
       console.error('Error fetching replies:', error);

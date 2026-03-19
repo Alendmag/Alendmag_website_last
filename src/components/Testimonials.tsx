@@ -15,7 +15,7 @@ const Testimonials: React.FC = () => {
 
   const fetchTestimonials = async () => {
     try {
-      const data = await testimonialsApi.list({ is_active: true });
+      const data = await testimonialsApi.list();
       setTestimonials((data || []).slice(0, 6));
     } catch (error) {
       console.error('Error fetching testimonials:', error);

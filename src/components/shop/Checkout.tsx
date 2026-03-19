@@ -69,7 +69,7 @@ const Checkout: React.FC = () => {
       await Promise.all(orderPromises);
 
       const productsList = cart.map(item => {
-        const name = isRTL ? item.name_ar : item.name_en;
+        const name = isRTL ? item.name : item.nameEn || item.name;
         const total = item.price * item.quantity;
         return `- ${name} (x${item.quantity}) - ${total} د.ل`;
       }).join('\n');
@@ -170,9 +170,9 @@ const Checkout: React.FC = () => {
               <div className="space-y-4 mb-6">
                 {cart.map((item) => (
                   <div key={item.id} className="flex gap-4 pb-4 border-b border-gray-200 dark:border-gray-700">
-                    <img src={item.image_url || 'https://via.placeholder.com/80'} alt={isRTL ? item.name_ar : item.name_en} className="w-20 h-20 rounded-lg object-cover" />
+                    <img src={item.image || 'https://via.placeholder.com/80'} alt={isRTL ? item.name : item.nameEn} className="w-20 h-20 rounded-lg object-cover" />
                     <div className="flex-1">
-                      <h3 className="font-medium text-gray-800 dark:text-white">{isRTL ? item.name_ar : item.name_en}</h3>
+                      <h3 className="font-medium text-gray-800 dark:text-white">{isRTL ? item.name : item.nameEn || item.name}</h3>
                       <p className="text-sm text-gray-600 dark:text-gray-400">{isRTL ? 'الكمية' : 'Qty'}: {item.quantity}</p>
                       <p className="font-bold text-blue-600">{item.price * item.quantity} {isRTL ? 'د.ل' : 'LYD'}</p>
                     </div>

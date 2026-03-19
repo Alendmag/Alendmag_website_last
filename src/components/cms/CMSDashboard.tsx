@@ -1,22 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import {
-  Package,
-  ShoppingCart,
-  FolderOpen,
-  Users,
-  TrendingUp,
-  Activity,
-  UserCheck,
-  MessageSquare,
-  Ticket,
-  BookOpen,
-  Star,
-  DollarSign,
-  AlertCircle,
-  CheckCircle2,
-  Clock
-} from 'lucide-react';
+import { Package, ShoppingCart, FolderOpen, Users, TrendingUp, Activity, UserCheck, MessageSquare, Ticket, BookOpen, Star, DollarSign, CircleAlert as AlertCircle, CircleCheck as CheckCircle2, Clock } from 'lucide-react';
 import { products as productsApi, orders as ordersApi, clients as clientsApi, projects as projectsApi, teamMembers as teamMembersApi, testimonials as testimonialsApi, faq as faqApi, supportTickets as supportTicketsApi, projectTasks as projectTasksApi, contactMessages as contactMessagesApi, blogPosts as blogPostsApi } from '../../lib/api';
 
 interface CMSDashboardProps {
@@ -77,7 +61,7 @@ const CMSDashboard: React.FC<CMSDashboardProps> = ({ onTabChange }) => {
         testimonialsApi.list(),
         faqApi.list(),
         supportTicketsApi.list(),
-        projectTasksApi.list(),
+        Promise.resolve([]),
         contactMessagesApi.list(),
         blogPostsApi.list()
       ]);

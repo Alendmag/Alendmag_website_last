@@ -44,7 +44,7 @@ const Blog: React.FC = () => {
 
   const fetchPosts = async () => {
     try {
-      const result = await blogPostsApi.list({ is_published: true });
+      const result = await blogPostsApi.list({ published: true });
       const data = (result as any)?.data || result;
       setPosts((data || []).slice(0, 3));
     } catch (error) {

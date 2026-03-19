@@ -7,7 +7,7 @@ import { products as productsApi } from '../../lib/api';
 import type { Product } from '../../lib/supabase';
 
 const ProductDetail: React.FC = () => {
-  const { id } = useParams();
+  const { id = '' } = useParams();
   const { i18n } = useTranslation();
   const { addToCart } = useCart();
   const navigate = useNavigate();

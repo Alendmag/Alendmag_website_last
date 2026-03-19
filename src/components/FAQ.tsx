@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ChevronDown, HelpCircle } from 'lucide-react';
+import { ChevronDown, Circle as HelpCircle } from 'lucide-react';
 import { faq as faqApi } from '../lib/api';
 import type { FAQ as FAQType } from '../lib/supabase';
 
@@ -16,7 +16,7 @@ const FAQ: React.FC = () => {
 
   const fetchFAQs = async () => {
     try {
-      const data = await faqApi.list({ is_active: true });
+      const data = await faqApi.list();
       setFaqs((data || []).slice(0, 8));
     } catch (error) {
       console.error('Error fetching FAQs:', error);
